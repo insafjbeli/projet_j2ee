@@ -1,16 +1,67 @@
-node {
-  
-    stage('Clone') {
-        
-       git credentialsId: 'git_credentials', url: 'https://github.com/ngrassa/projet_j2ee.git'
+pipeline {
+
+    agent any
+
+    tools {
+
+        maven "Maven"
+
+        jdk "java"
+
     }
 
-    stage('Build') {
-        withMaven(jdk: 'java', maven: 'maven') {
-        sh 'mvn clean install package'
+    
+
+    stages {
+
+        stage ('Initialize') {
+
+            steps {
+
+                echo "PATH = ${M2_HOME}/bin:${PATH}"
+
+                echo "M2_HOME= /usr/local/src/apache-maven"
+
+            }
+
+        }
+
+        
+
+        stage('git clone'){
+
+            steps{
+
+                git 'https://github.com/ngrassa/projet_j2ee.git'
+
+            }
+
+        }
+
+        
+
+        stage('Build'){
+
+            steps{
+
+                sh 'mvn clean install package'
+
+            }
+
+        }
+
+        
+
+        stage('Deploy'){
+
+            steps{
+
+                deploy adapters: [tomcat8(credentialsId: 'tomcat', path: '', url:'http://192.168.229.168:8080')], contextPath: null, war: '*/.war'
+
+        }
+
     }
-    }
-     stage('Deploy') {
-       deploy adapters: [tomcat8(credentialsId: 'id_tomcat', path: '', url: 'http://13.37.41.70:8080')], contextPath: null, war: '**/*.war'
-    }
+
 }
+
+
